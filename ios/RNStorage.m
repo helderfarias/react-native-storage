@@ -1,13 +1,41 @@
 #import "RNStorage.h"
 #import <React/RCTLog.h>
-#import "SQLiteResult.h"
 #import <sqlite3.h>
+#import "MigrationManager.h"
 
 @implementation RNStorage
 
 - (dispatch_queue_t)methodQueue
 {
     return dispatch_get_main_queue();
+}
+
+- (void) applyMigrations:(NSInteger)version database:(FMDatabase *)newDB
+{
+  NSInteger oldVersion = 0;
+  NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+  if ([preferences objectForKey:@"DATABASE_MIGRATION_CURRENT_VERSION"] != nil) {
+    oldVersion = [[preferences objectForKey:@"DATABASE_MIGRATION_CURRENT_VERSION"] integerValue];
+  }
+  
+  RCTLogInfo(@"current migration version: %ld", oldVersion);
+  
+  if (oldVersion >= version) {
+    RCTLogInfo(@"no migration");
+    return;
+  }
+  
+  @try {
+    MigrationManager *manager = [[MigrationManager alloc] initWithDatabase:newDB];
+    
+    BOOL applied = [manager applyFrom:oldVersion to:version];
+    
+    if (applied) {
+      [preferences setInteger:version forKey:@"DATABASE_MIGRATION_CURRENT_VERSION"];
+    }
+  } @catch(NSException *exception) {
+    RCTLogError(@"error: %@", exception);
+  }
 }
 
 RCT_EXPORT_MODULE()
@@ -19,7 +47,7 @@ RCT_EXPORT_METHOD(open:(NSString *)nameArgs
                   resolver:(RCTPromiseResolveBlock)resolve 
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-  RCTLogInfo(@"Pretending to create an event %@", nameArgs);
+  RCTLogInfo(@"open or create database %@", nameArgs);
   
   @synchronized (self) {
     if (db != nil) {
@@ -27,12 +55,16 @@ RCT_EXPORT_METHOD(open:(NSString *)nameArgs
     }
  
     @try {
-      NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:nameArgs];
-
+      NSURL *documentsDir = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory
+                                                                    inDomains:NSUserDomainMask] lastObject];
+      
+      NSString *path = [documentsDir.path stringByAppendingPathComponent:nameArgs];
+      
       db = [FMDatabase databaseWithPath:path];
   
       BOOL ok = [db openWithFlags:SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE];
       if (ok) {
+        [self applyMigrations:versionArgs database:db];
         resolve(@"true");
         return;
       }
@@ -50,7 +82,7 @@ RCT_EXPORT_METHOD(query:(NSString *)sql
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-  RCTLogInfo(@"Query for %@ -> tx %d", sql, tx);
+  RCTLogInfo(@"query for %@ -> tx %d", sql, tx);
   
   @synchronized (self) {
     if (tx && ![db inTransaction]) {

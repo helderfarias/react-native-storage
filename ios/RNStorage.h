@@ -9,7 +9,7 @@
 @interface RNStorage : NSObject <RCTBridgeModule> {
   FMDatabase *db;
 }
-  
+
 @property (nonatomic, copy) FMDatabase *db;
 
 @end
