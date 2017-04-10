@@ -11,7 +11,6 @@
 
 ### Manual installation
 
-
 #### iOS
 
 1. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
@@ -34,6 +33,25 @@
       compile project(':react-native-storage')
   	```
 
+
+### Install Additional Libraries
+
+#### iOS
+
+1. Configure pod
+```bash
+  cd ios && pod init
+```
+2. Add FMDB library on file ios/Podfile
+```bash
+  ...
+  pod 'FMDB'
+  ...
+```
+3. Install
+```bash
+  pod install
+```
 
 ## Usage
 ```javascript

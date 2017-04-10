@@ -13,27 +13,23 @@ class Database {
     }
 
     query(sql, args) {
-        return RNStorage.query(sql, args);
-    }
-
-    queryForCount(sql, args) {
-        return RNStorage.queryForCount(sql, args);
-    }
-
-    execSQL(sql, args) {
-        return RNStorage.queryForCount(sql, args);
+        return RNStorage.query(sql, args, false);
     }
 
     update(table, values, whereClausule, whereArgs) {
-        return RNStorage.update(sql, values, whereClausule, whereArgs);
+        return RNStorage.update(table, values, whereClausule, whereArgs, false);
     }
 
     insert(table, values) {
-        return RNStorage.insert(table, values);
+        return RNStorage.insert(table, values, false);
     }
 
     delete(table, whereClausule, whereArgs) {
-        return RNStorage.delete(table, whereClausule, whereArgs);
+        return RNStorage.delete(table, whereClausule, whereArgs, false);
+    }
+
+    execSQL(sql, args) {
+        return RNStorage.execSQL(sql, args, false);
     }
 
     transaction(callback) {
@@ -43,12 +39,11 @@ class Database {
             }
 
             callback({
-                query: (sql, args) => RNStorage.query(sql, args),
-                update: (table, values, whereClausule, whereArgs) => RNStorage.update(sql, values, whereClausule, whereArgs),
-                insert: (table, values) => RNStorage.insert(table, values),
-                delete: (table, whereClausule, whereArgs) => RNStorage.delete(table, whereClausule, whereArgs),
-                queryForCount: (sql, args) => RNStorage.queryForCount(sql, args),
-                execSQL: (sql, args) => RNStorage.execSQL(sql, args),
+                query: (sql, args) => RNStorage.query(sql, args, true),
+                update: (table, values, whereClausule, whereArgs) => RNStorage.update(sql, values, whereClausule, whereArgs, true),
+                insert: (table, values) => RNStorage.insert(table, values, true),
+                delete: (table, whereClausule, whereArgs) => RNStorage.delete(table, whereClausule, whereArgs, true),
+                execSQL: (sql, args) => RNStorage.execSQL(sql, args, true),
                 commit: () => RNStorage.commit(),
                 rollback: () => RNStorage.rollback(),
             });
