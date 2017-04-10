@@ -4,7 +4,7 @@
 #import <React/RCTBridgeModule.h>
 #endif
 
-#import "FMDB.h"
+#import <FMDB/FMDB.h>
 
 @interface RNStorage : NSObject <RCTBridgeModule> {
   FMDatabase *db;

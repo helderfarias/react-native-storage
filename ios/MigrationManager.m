@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <React/RCTLog.h>
 #import "MigrationManager.h"
-#import "FMDB.h"
 
 @implementation MigrationManager
 

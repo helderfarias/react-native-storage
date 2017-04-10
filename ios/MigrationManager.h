@@ -10,7 +10,7 @@
 #define MigrationManager_h
 #endif /* MigrationManager_h */
 
-#import "FMDB.h"
+#import <FMDB/FMDB.h>
 
 @interface MigrationManager : NSObject {
   FMDatabase *db;
