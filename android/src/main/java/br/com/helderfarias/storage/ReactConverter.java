@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,7 +59,7 @@ public final class ReactConverter {
 
     public static String[] reactToArrays(ReadableMap readableMap) throws JSONException {
         if (readableMap == null) {
-            return null;
+            return new String[]{};
         }
 
         ArrayList<String> output = new ArrayList<>();
@@ -105,7 +106,7 @@ public final class ReactConverter {
 
     public static String[] reactToArrays(ReadableArray readableArray) throws JSONException {
         if (readableArray == null) {
-            return null;
+            return new String[]{};
         }
 
         ArrayList<String> output = new ArrayList<>();
@@ -245,6 +246,10 @@ public final class ReactConverter {
     }
 
     public static WritableArray jsonToReact(JSONArray jsonArray) throws JSONException {
+        if (jsonArray == null) {
+            return null;
+        }
+
         WritableArray writableArray = Arguments.createArray();
 
         for(int i=0; i < jsonArray.length(); i++) {
@@ -268,4 +273,16 @@ public final class ReactConverter {
         return writableArray;
     }
 
+    public static WritableArray arraysToReact(List<JSONObject> rows) throws JSONException {
+        WritableArray writableArray = Arguments.createArray();
+        if (rows == null) {
+            return writableArray;
+        }
+
+        for (JSONObject value : rows) {
+            writableArray.pushMap(jsonToReact(value));
+        }
+
+        return writableArray;
+    }
 }
