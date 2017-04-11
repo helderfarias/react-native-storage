@@ -1,0 +1,16 @@
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '9.0'
+
+pod "FMDB"
+
+target 'Example' do
+  target 'ExampleTests' do
+    inherit! :search_paths
+  end
+end
+
+target 'Example-tvOS' do
+  target 'Example-tvOSTests' do
+    inherit! :search_paths
+  end
+end
