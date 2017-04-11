@@ -34,9 +34,7 @@
   	```
 
 
-### Install Additional Libraries
-
-#### iOS
+### Additional Libraries iOS (Required)
 
 1. Configure pod
 ```bash
@@ -53,6 +51,44 @@
   pod install
 ```
 
+
+### Migrations
+
+#### iOS
+
+1. Create directory "assets/migrations" in $PROJECT_DIR/ios/assets/migrations
+2. Copy migrations sql in format "1.sql"
+```bash
+  ...
+      ios/
+        assets/
+          migrations/
+            1.sql
+            2.sql
+            3.sql
+  ...
+```
+3. Open xcode, open $PROJECT_DIR/ios/<project_name>.xcodeproj
+4. Add directory "assets"
+
+
+#### Android
+
+1. Create directory "assets/migrations" in $PROJECT_DIR/android/app/main/assets/migrations
+2. Copy migrations sql in format "1.sql"
+```bash
+  ...
+      android/
+        app/
+          main/
+            assets/
+              migrations/
+                1.sql
+                2.sql
+                3.sql
+  ...
+```
+
 ## Usage
 ```javascript
 import Storage from 'react-native-storage';
@@ -67,14 +103,6 @@ import Storage from 'react-native-storage';
     let rows = await db.query("SELECT * FROM versions");
     console.log(rows);
 
-    await db.transaction(async (tx) => {
-      await tx.insert("versions", { "value": 1 });
-      await tx.insert("versions", { "value": 2 });
-      await tx.insert("versions", { "value": 3 });
-      await tx.rollback();
-      await tx.query("SELECT * FROM versions").then(rows => console.log(rows));      
-    });
-
     console.log(`Started: ${new Date()}`);
     await db.transaction(async (tx) => {
       for (i = 0; i <= 1000; i++) {
@@ -83,8 +111,6 @@ import Storage from 'react-native-storage';
       await tx.commit();
     });
     console.log(`Ended: ${new Date()}`);    
-
-    await db.query("SELECT * FROM versions").then(rows => console.log(rows));      
   }
 ```
   
