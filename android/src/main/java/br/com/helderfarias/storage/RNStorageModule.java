@@ -1,7 +1,8 @@
-
 package br.com.helderfarias.storage;
 
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.facebook.react.bridge.Dynamic;
@@ -20,10 +21,14 @@ import java.util.List;
 
 import br.com.helderfarias.storage.jdbc.JsonMapper;
 import br.com.helderfarias.storage.jdbc.Session;
+import br.com.helderfarias.storage.migration.MigrationException;
+import br.com.helderfarias.storage.migration.SQLiteMigrations;
 
 public class RNStorageModule extends ReactContextBaseJavaModule {
 
     private static final String TAG = RNStorageModule.class.getSimpleName();
+
+    private final static String PREFERENCES_KEY = "br.com.helderfarias.storage.MIGRATIONS";
 
     private final ReactApplicationContext reactContext;
 
@@ -42,6 +47,8 @@ public class RNStorageModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void open(String name, int version, Promise promise) {
         this.factory = new DatabaseFactory(this.reactContext, name, version);
+
+        applyMigrationsIfRequired(version);
 
         promise.resolve(this.factory.isOpen());
     }
@@ -237,6 +244,29 @@ public class RNStorageModule extends ReactContextBaseJavaModule {
         String message = "without transaction started";
 
         promise.reject("error", message, new IllegalStateException(message));
+    }
+
+    private void applyMigrationsIfRequired(int version) {
+        SharedPreferences preferences = this.reactContext.getSharedPreferences(PREFERENCES_KEY, Context.MODE_PRIVATE);
+        int oldVersion = preferences.getInt("DATABASE_MIGRATION_CURRENT_VERSION", 0);
+        Log.d(TAG, "current migration version: " + oldVersion);
+
+        if (oldVersion >= version) {
+            Log.d(TAG, "no migration");
+            return;
+        }
+
+        try {
+            SQLiteMigrations migrations = new SQLiteMigrations(this.reactContext);
+
+            migrations.apply(this.factory.getDb(), oldVersion, version);
+
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putInt("DATABASE_MIGRATION_CURRENT_VERSION", version);
+            editor.apply();
+        } catch (MigrationException e) {
+            Log.e(TAG, "error on apply migrations",  e);
+        }
     }
 
 }
