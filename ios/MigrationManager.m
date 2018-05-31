@@ -25,13 +25,13 @@
 - (BOOL) applyFrom:(NSInteger)fromVersion to:(NSInteger)toVersion
 {
   NSString * resourcePath = [[NSBundle mainBundle] resourcePath];
-  
+
   NSString * documentsPath = [resourcePath stringByAppendingPathComponent:@"assets/migrations"];
-  
+
   NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:documentsPath error:NULL];
-  
+
   NSArray *migrations = [self filter:files from:fromVersion to:toVersion];
-  
+
   if ([migrations count] <= 0) {
     RCTLogInfo(@"without migrations files");
     return FALSE;
@@ -39,26 +39,24 @@
 
   @try {
     [db beginTransaction];
-    
+
     BOOL status = FALSE;
 
     for (NSDictionary *migration in migrations) {
       NSString *file = [migration valueForKey:@"file"];
       NSString *content = [migration valueForKey:@"content"];
-      RCTLogInfo(@"apply %@", file);
-      
-      status = [db executeUpdate:content];
+
+      [db executeUpdate:content];
       if (!status) {
-        RCTLogInfo(@"rollback %@", file);
         break;
       }
     }
-    
+
     if (!status) {
       [db rollback];
       return FALSE;
     }
-    
+
     [db commit];
     return TRUE;
   } @catch (NSException *exception) {
@@ -70,7 +68,7 @@
 - (NSArray *) filter:(NSArray *)assets from:(NSInteger)fromVersion to:(NSInteger)toVersion
 {
   NSMutableArray *filters = [[NSMutableArray alloc] initWithCapacity:assets.count];
-  
+
   for (NSString *fileName in assets) {
     NSString *version = [self getVersion:fileName];
     NSString *content = [self readContent:fileName];
@@ -85,7 +83,7 @@
       }
     }
   }
-  
+
   return filters;
 }
 
@@ -93,12 +91,12 @@
 {
   NSString * resourcePath = [[NSBundle mainBundle] resourcePath];
   NSString * path = [resourcePath stringByAppendingPathComponent:[NSString stringWithFormat:@"assets/migrations/%@", fileName]];
-  
+
   NSString* content = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:NULL];
   if (content == nil) {
     return @"";
   }
-  
+
   return content;
 }
 
@@ -112,7 +110,7 @@
 - (NSInteger) indexOf:(NSString *)src text:(NSString *)text
 {
   NSRange range = [src rangeOfString:text];
-  
+
   if ( range.length > 0 ) {
     return range.location;
   } else {
