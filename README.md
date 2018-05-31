@@ -104,13 +104,12 @@ import Storage from 'react-native-storage';
     console.log(rows);
 
     console.log(`Started: ${new Date()}`);
-    await db.transaction(async (tx) => {
+    await db.transaction((tx) => {
       for (i = 0; i <= 1000; i++) {
-        await tx.insert("versions", { "value": i });
-      }      
-      await tx.commit();
-    });
-    console.log(`Ended: ${new Date()}`);    
+        tx.insert("versions", { "value": i });
+      }
+    }).catch(e => console.log(e));
+    console.log(`Ended: ${new Date()}`);
   }
 ```
   
