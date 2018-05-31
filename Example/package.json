@@ -9,7 +9,7 @@
 	"dependencies": {
 		"react": "16.0.0-alpha.6",
 		"react-native": "0.43.3",
-		"react-native-storage": "git+https://github.com/helderfarias/react-native-storage"
+		"react-native-storage": "file:.."
 	},
 	"devDependencies": {
 		"babel-jest": "19.0.0",

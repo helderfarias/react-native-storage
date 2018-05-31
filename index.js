@@ -2,6 +2,49 @@ import { NativeModules } from 'react-native';
 
 const { RNStorage } = NativeModules;
 
+class StatementTask {
+
+    constructor() {
+        this.poll = [];
+    }
+
+    query(sql, args) {
+        this.poll.push(function task() {
+            return RNStorage.query(sql, args, true);
+        });
+    }
+
+    update (table, values, whereClausule, whereArgs) { 
+        this.poll.push(function task() {
+            return RNStorage.update(sql, values, whereClausule, whereArgs, true);
+        });
+    }
+
+    insert(table, values) {
+        this.poll.push(function task() {
+            return RNStorage.insert(table, values, true);
+        });
+    }
+
+    delete(table, whereClausule, whereArgs) {
+        this.poll.push(function task() {
+            return RNStorage.delete(table, whereClausule, whereArgs, true);
+        });
+    } 
+
+    execSQL(sql, args) {
+        this.poll.push(function task() {
+            return RNStorage.execSQL(sql, args, true);
+        });
+    }
+
+    invokeAll() {
+        const tasks = this.poll.map(task => task());
+        return Promise.all(tasks);
+    }
+
+}
+
 class Database {
 
     constructor(db) {
@@ -32,22 +75,18 @@ class Database {
         return RNStorage.execSQL(sql, args, false);
     }
 
-    transaction(callback) {
-        return RNStorage.startTransaction().then(ok => {
-            if (!ok) {
-                return null;
-            }
+    async transaction(commands) {
+        const statement = new StatementTask();
 
-            callback({
-                query: (sql, args) => RNStorage.query(sql, args, true),
-                update: (table, values, whereClausule, whereArgs) => RNStorage.update(sql, values, whereClausule, whereArgs, true),
-                insert: (table, values) => RNStorage.insert(table, values, true),
-                delete: (table, whereClausule, whereArgs) => RNStorage.delete(table, whereClausule, whereArgs, true),
-                execSQL: (sql, args) => RNStorage.execSQL(sql, args, true),
-                commit: () => RNStorage.commit(),
-                rollback: () => RNStorage.rollback(),
-            });
-        });
+        await commands(statement);
+    
+        return await RNStorage.startTransaction().then(ok => {
+            if (ok) {
+                return statement.invokeAll()
+                                .then(() => RNStorage.commit())
+                                .catch(() => RNStorage.rollback());
+            }
+        }).catch(e => RNStorage.rollback());
     }
 
 }

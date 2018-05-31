@@ -18,12 +18,18 @@ export default class ClienteStorage extends Component {
 
     await db.insert("clients", { num: 400 });
 
-    await db.transaction(async (tx) => {
-      await tx.execSQL("INSERT INTO clients(id) VALUES(1)");
-      await tx.execSQL("INSERT INTO clients(id) VALUES(2)");
-      await tx.execSQL("INSERT INTO clients(id) VALUES(3)");
-      await tx.commit();
+    await db.transaction((tx) => {
+      tx.execSQL("INSERT INTO clients(id) VALUES(1)");
+      tx.execSQL("INSERT INTO clients(id) VALUES(2)");
+      tx.execSQL("INSERT INTO clients(id) VALUES(3)");
     });
+
+    await db.transaction((tx) => {
+      tx.execSQL("INSERT INTO clients(id) VALUES(1)");
+      throw "rollback test";
+    }).catch(e => console.log(e));
+
+    console.log(await db.query("SELECT count(*) FROM clients"));
   }
 
   render() {

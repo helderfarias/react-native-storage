@@ -2919,9 +2919,8 @@ react-devtools-core@^2.0.8:
     cross-env "^3.1.4"
     ws "^2.0.3"
 
-"react-native-storage@git+https://github.com/helderfarias/react-native-storage":
+"react-native-storage@file:..":
   version "1.0.0"
-  resolved "git+https://github.com/helderfarias/react-native-storage#00f263b09ec1276d3a1d434e3452d5d2038325b3"
 
 react-native@0.43.3:
   version "0.43.3"
