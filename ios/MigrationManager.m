@@ -31,8 +31,6 @@
   NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:documentsPath error:NULL];
 
   NSArray *migrations = [self filter:files from:fromVersion to:toVersion];
-
-  RCTLogInfo(@"migrations %d", [migrations count]);
     
   if ([migrations count] <= 0) {
     RCTLogInfo(@"without migrations files");
