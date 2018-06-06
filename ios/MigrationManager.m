@@ -32,6 +32,8 @@
 
   NSArray *migrations = [self filter:files from:fromVersion to:toVersion];
 
+  RCTLogInfo(@"migrations %d", [migrations count]);
+    
   if ([migrations count] <= 0) {
     RCTLogInfo(@"without migrations files");
     return FALSE;
@@ -43,16 +45,15 @@
     BOOL status = FALSE;
 
     for (NSDictionary *migration in migrations) {
-      NSString *file = [migration valueForKey:@"file"];
       NSString *content = [migration valueForKey:@"content"];
 
       [db executeUpdate:content];
-      if (!status) {
+      if (!status && ![@"not an error" isEqualToString:db.lastErrorMessage]) {
         break;
       }
     }
 
-    if (!status) {
+    if (!status && ![@"not an error" isEqualToString:db.lastErrorMessage]) {
       [db rollback];
       return FALSE;
     }
