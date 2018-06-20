@@ -25,7 +25,7 @@
     return;
   }
 
-  @try {
+    @try {
     MigrationManager *manager = [[MigrationManager alloc] initWithDatabase:newDB];
 
     BOOL applied = [manager applyFrom:oldVersion to:version];
