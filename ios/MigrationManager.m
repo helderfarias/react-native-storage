@@ -31,6 +31,8 @@
   NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:documentsPath error:NULL];
 
   NSArray *migrations = [self filter:files from:fromVersion to:toVersion];
+
+  RCTLogInfo(@"migrations %lu", [migrations count] - 1);
     
   if ([migrations count] <= 0) {
     RCTLogInfo(@"without migrations files");
@@ -46,6 +48,7 @@
       NSString *content = [migration valueForKey:@"content"];
 
       [db executeUpdate:content];
+        
       if (!status && ![@"not an error" isEqualToString:db.lastErrorMessage]) {
         break;
       }
@@ -56,6 +59,8 @@
       return FALSE;
     }
 
+    RCTLogInfo(@"applied migrations %lu", [migrations count] - 1);
+      
     [db commit];
     return TRUE;
   } @catch (NSException *exception) {
