@@ -16,7 +16,6 @@ public class RNStoragePackage implements ReactPackage {
       return Arrays.<NativeModule>asList(new RNStorageModule(reactContext));
     }
 
-    @Override
     public List<Class<? extends JavaScriptModule>> createJSModules() {
       return Collections.emptyList();
     }
